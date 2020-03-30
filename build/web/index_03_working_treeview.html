@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            .treeview, .treeview ul {
+              list-style-type: none;
+            }
+
+            .treeview li {
+              margin: 0vw;
+              padding: 0vw;
+            }
+
+            .caret {
+              cursor: pointer;
+              -webkit-user-select: none; /* Safari 3.1+ */
+              -moz-user-select: none; /* Firefox 2+ */
+              -ms-user-select: none; /* IE 10+ */
+              user-select: none;
+            }
+
+            .caret::before {
+              content: "\25B6";
+              color: black;
+              display: inline-block;
+              margin-right: 6px;
+            }
+
+            .caret-down::before {
+              -ms-transform: rotate(90deg); /* IE 9 */
+              -webkit-transform: rotate(90deg); /* Safari */
+              transform: rotate(90deg);  
+            }
+
+            .nested {
+              display: none;
+            }
+
+            .active {
+              display: block;
+        }
+        </style>
+        <style>
+            div {
+                float:left;
+                margin:1vw; 
+                padding:1vw; 
+                border: solid 1px #CCCCCC; 
+                min-width:25vw;
+                max-width:25vw;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content1" style="border:1px solid lightgrey;float:left;"></div>
+        <div id="content2" style="border:1px solid lightgrey;float:left;"></div>
+        <div id="content3" style="border:1px solid lightgrey;float:left;"></div>
+    <script>
+        
+        "use strict";
+        
+        /*
+         * 
+         * sample code for javascript data structures
+         * see https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393 
+         * 
+         * 
+         * Stack
+         * 
+         */
+        function Stack() {
+            this._size = 0;
+            this._storage = {};
+        }
+        Stack.prototype.push = function(data) {
+            var size = ++this._size;
+            this._storage[size] = data;
+        };
+        Stack.prototype.pop = function() {
+            var size = this._size,
+                deletedData;
+            if (size) {
+                deletedData = this._storage[size];
+                delete this._storage[size];
+                this._size--;
+                return deletedData;
+            }
+        };
+        /*
+         * 
+         * Queue
+         * 
+         */function Queue() {
+            this._oldestIndex = 1;
+            this._newestIndex = 1;
+            this._storage = {};
+        }
+        Queue.prototype.size = function() {
+            return this._newestIndex - this._oldestIndex;
+        };
+        Queue.prototype.enqueue = function(data) {
+            this._storage[this._newestIndex] = data;
+            this._newestIndex++;
+        };
+        Queue.prototype.dequeue = function() {
+            var oldestIndex = this._oldestIndex,
+                newestIndex = this._newestIndex,
+                deletedData;
+            if (oldestIndex !== newestIndex) {
+                deletedData = this._storage[oldestIndex];
+                delete this._storage[oldestIndex];
+                this._oldestIndex++;
+               return deletedData;
+            }
+        };    
+        /*
+         * 
+         * Tree 
+         * 
+         */function Node(data) {
+            this.data = data;
+            this.parent = null;
+            this.children = [];
+        }
+        function Tree(data) {
+            var node = new Node(data);
+            this._root = node;
+        }
+        Tree.prototype.traverseDF = function(callback) {
+            // this is a recurse and immediately-invoking function
+            (function recurse(currentNode) {
+                // step 2
+                for (var i = 0, length = currentNode.children.length; i < length; i++) {
+                    // step 3
+                    recurse(currentNode.children[i]);
+                }
+                // step 4
+                callback(currentNode);
+                // step 1
+            })(this._root);
+        };
+        Tree.prototype.traverseBF = function(callback) {
+            var queue = new Queue();
+            queue.enqueue(this._root);
+            var currentTree = queue.dequeue();
+            while(currentTree){
+                for (var i = 0, length = currentTree.children.length; i < length; i++) {
+                    queue.enqueue(currentTree.children[i]);
+                }
+                callback(currentTree);
+                currentTree = queue.dequeue();
+            }
+        };
+        Tree.prototype.contains = function(callback, traversal) {
+            traversal.call(this, callback);
+        };
+        Tree.prototype.add = function(data, toData, traversal) {
+            var child = new Node(data),
+                parent = null,
+                callback = function(node) {
+                    if (node.data === toData) {
+                        parent = node;
+                    }
+                };
+            this.contains(callback, traversal);
+            if (parent) {
+                parent.children.push(child);
+                child.parent = parent;
+            } else {
+                throw new Error('Cannot add node to a non-existent parent.');
+            }
+        };
+        Tree.prototype.remove = function(data, fromData, traversal) {
+            var tree = this,
+                parent = null,
+                childToRemove = null,
+                index;
+            var callback = function(node) {
+                if (node.data === fromData) {
+                    parent = node;
+                }
+            };
+            this.contains(callback, traversal);
+            if (parent) {
+                index = findIndex(parent.children, data);
+                if (index === undefined) {
+                    throw new Error('Node to remove does not exist.');
+                } else {
+                    childToRemove = parent.children.splice(index, 1);
+                }
+            } else {
+                throw new Error('Parent does not exist.');
+            }
+            return childToRemove;
+        };
+        function findIndex(arr, data) {
+            var index;
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i].data === data) {
+                    index = i;
+                }
+            }
+            return index;
+        }
+        /*
+         * 
+         * end sample data structures code
+         * 
+         */
+        Tree.prototype.printTreeBF = function () {
+            const prnt = (obj) => {console.log(obj.data);}; 
+            console.log("print " + this._root.data + " tree breadth first ----------------------");
+            this.traverseBF( prnt );
+        };
+        Tree.prototype.printTreeDF = function () {
+            const prnt = (obj) => {console.log(obj.data);}; 
+            console.log("print " + this._root.data + " tree depth first ----------------------");
+            this.traverseDF( prnt );
+        };
+        function addList () {
+            var list = document.createElement("ul");
+            list.setAttribute("class","nested");
+            return list;
+        };
+        function addItem (innerHTML) {
+            var li = document.createElement("li");
+            li.innerHTML = innerHTML;
+            return li;
+        };
+        Tree.prototype.makeTreeView = function(id) {
+            var ul = document.createElement("ul");
+            ul.setAttribute("class","treeview");
+            // the fn. inside the parens "()" is is immediately invoked since the 
+            // parens (ie function call operators) are among the highest precedence 
+            // operators in javascript along with [] (array) . (period), and "new" (constructor). 
+            // pass the root of the tree to start.
+            ul.appendChild(
+                (function recurse(currentNode) {
+                    // var li is LOCAL to facilitate the recursion!
+                    var li = document.createElement("li");
+                    // this node has children. add a list and nest a new list for the children
+                    if (currentNode.children.length) {
+                        var s = document.createElement("span");
+                        s.setAttribute("class","caret");
+                        s.innerHTML = currentNode.data;
+                        li.appendChild(s);
+                        var ul = document.createElement("ul");
+                        ul.setAttribute("class","nested");
+                        li.appendChild(ul);
+                    // this node has no children. just add a list item
+                    } else {
+                        li.innerHTML = currentNode.data;
+                    }
+                    // step 2 Enter a for loop and iterate once for each child of currentNode, beginning with the first child. 
+                    for (var i = 0, length = currentNode.children.length; i < length; i++) {
+                        // step 3 Inside the body of the for loop, invoke recurse with a children of currentNode.
+                        li.lastChild.appendChild(recurse(currentNode.children[i]));
+                    }
+                    return li;
+                    
+                    // step 1 Immediately invoke recurse with the root node of a tree as its argumen
+                })(this._root)
+            ); // appendChild. tree view should be all done append it to the outmost <ul>
+            // this styles and adds click event for the parent nodes (ie list items with the caret) 
+            var toggler = ul.getElementsByClassName("caret");
+            for (var i = 0; i < toggler.length; i++) {
+                toggler[i].addEventListener("click", function() {
+                this.parentElement.querySelector(".nested").classList.toggle("active"); //expand & contract
+                this.classList.toggle("caret-down"); //rotate & restyle as before::
+                });
+            }
+            console.log(ul);
+            document.getElementById(id).appendChild(ul);
+        };            
+       /*'
+         * MakeTree builds a breadth-first tree from a json object.
+         */
+        function MakeTree (params) {
+            var tree = new Tree(params.name);
+            var currentNode = tree._root;
+            /* spin through each json obj(s) */
+            for (var i = 0; i < params.obj.length; i++) {
+                /* spin through each obj property(s) */
+                for (var p in params.obj[i]) {
+                    /* do we have a property? Remember left joins may return null columns meaning 0 children */
+                    if (params.obj[i][p]) { 
+                        /* traverse tree & callback every node. as we visit each node. if this prop is found set it to our current position in the tree */
+                        tree.contains(function(node){ 
+                            /* if the prop is already on the tree. position on it in case later we may add children under here and also know not to add it again */
+                            if (node.data === params.obj[i][p]) {
+                                currentNode = node;
+                            }
+                        }, tree.traverseDF);
+                        /* we didnt find the prop so add it and position on it in case later we may add children under here */
+                        if (currentNode.data !== params.obj[i][p]) {
+                            tree.add(
+                                params.obj[i][p], /* add this child... */
+                                currentNode.data, /* to this parent node... */
+                                tree.traverseDF); /* searching for the parent node with traverseDF */
+                            tree.contains(function(node){ /* position on the node just added */
+                                if (node.data === params.obj[i][p]) {
+                                    currentNode = node;
+                                }
+                            }, tree.traverseDF);
+                        }
+                    } else {
+                        break; /* no more to descendants to add for this json obj. */
+                    }                    
+                }
+                currentNode = tree._root; // position to tree root and move to the next obj
+            }
+            return tree;
+        }
+
+        /* main program */
+
+        /* JSON. Each json value will become a node and eventually a list item (unless null) */ 
+        /* Each json obj reading from left to right will become a root to leaf path in the tree */
+        /* For instance tea has a green child, and green has a gyokuro child.  */
+        /* Subsequent JSON rows serve as an existsing path to add a new child. */
+        const bevObj = 
+        [
+            {"beverage":"water" , "beverageType":null,    "ingredient":null},
+            {"beverage":"coffee", "beverageType":null,    "ingredient":null},
+            {"beverage":"tea",    "beverageType":"black", "ingredient":null},
+            {"beverage":"tea",    "beverageType":"white", "ingredient":null},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"sencha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"gyokuro"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"matcha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"pi lo chun"}
+        ];
+        
+        const treeOfBevs = MakeTree({
+            "obj" : bevObj,
+            "name" : "beverages"
+        });
+        treeOfBevs.printTreeBF();
+        treeOfBevs.makeTreeView("content1");
+        
+        // depth0 is redundant in this case since Tree constructor creates a new root node with data "one"
+        // just trying it out anyway to see whether adding it makes the json easier to read
+        const numObj =
+        [
+            {"depth0":"one", "depth1":"two" ,  "depth2":"five"},
+            {"depth0":"one", "depth1":"two" ,  "depth2":"six"},
+            {"depth0":"one", "depth1":"three", "depth2":null},
+            {"depth0":"one", "depth1":"four",  "depth2":"seven"}
+        ];        
+        const treeOfNums = MakeTree({
+            "obj" : numObj,
+            "name" : "one"
+        });
+        treeOfNums.printTreeBF();
+        treeOfNums.makeTreeView("content2");
+       
+        const bevObj2 = 
+        [
+            {"depth01":"water" ,  "depth02":null ,         "depth03":null},
+            {"depth01":"coffee" , "depth02":"cappuccino" , "depth03":null},
+            {"depth01":"coffee" , "depth02":"macchiato" ,  "depth03":null},
+            {"depth01":"coffee" , "depth02":"espresso" ,   "depth03":null},
+            {"depth01":"tea" ,    "depth02":"black" ,      "depth03":null},
+            {"depth01":"tea" ,   "depth02":"white" ,       "depth03":null},
+            {"depth01":"tea" ,   "depth02":"green" ,       "depth03":"sencha"},
+            {"depth01":"tea" ,   "depth02":"green" ,       "depth03":"gyokuro"},
+            {"depth01":"tea" ,   "depth02":"green" ,       "depth03":"matcha"},
+            {"depth01":"tea" ,   "depth02":"green" ,       "depth03":"pi lo chun"}
+        ];
+        
+        const treeOfBevs2 = MakeTree({
+            "obj" : bevObj2,
+            "name" : "beverages 2"
+        });
+        treeOfBevs2.printTreeBF();
+        treeOfBevs2.makeTreeView("content3");
+        
+    </script>
+    </body>
+</html>

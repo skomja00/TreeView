@@ -1,0 +1,71 @@
+{
+"dbError": "",
+"json": [
+        {
+        "a": "Visits By Date",
+        "b": "Office Visit",
+        "c": "2019-11-06 $154.950",
+        "d": "TUN143981 $154.950"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Vaccination",
+        "c": "2019-11-06 $180.000",
+        "d": "TUN114977 $45.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "ED Visit",
+        "c": "2019-12-07 $4000.000",
+        "d": "TUN193741 $2000.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "ED Visit",
+        "c": "2019-12-07 $4000.000",
+        "d": "TUN193448 $2000.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Office Visit",
+        "c": "2019-10-12 $150.000",
+        "d": "TUN111114 $150.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Vaccination",
+        "c": "2019-11-06 $180.000",
+        "d": "TUN147765 $45.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Vaccination",
+        "c": "2019-11-06 $180.000",
+        "d": "TUN559116 $45.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Vaccination",
+        "c": "2019-11-06 $180.000",
+        "d": "TUN158929 $45.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Office Visit",
+        "c": "2019-12-07 $150.000",
+        "d": "TUN922629 $150.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "Vaccination",
+        "c": "2019-11-13 $45.000",
+        "d": "TUN111119 $45.000"
+        },
+        {
+        "a": "Visits By Date",
+        "b": "ED Visit",
+        "c": "2020-01-01 $2000.000",
+        "d": "TUN111120 $2000.000"
+        }
+    ]
+}

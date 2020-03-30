@@ -1,0 +1,512 @@
+<!-- 
+    data structures coding references:
+     * https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393 
+     * https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work
+     * https://medium.com/@_jmoller/javascript-data-structures-trees-c961297e6482
+     **/ -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Following style verbatim per W3 How To -->
+<style>
+    ul {
+      list-style-type: none;
+    }
+
+    div {
+        float:left;
+        margin:1vw; 
+        padding:1vw; 
+        border: solid 1px #CCCCCC; 
+        min-width:25vw;
+        max-width:25vw;
+    }
+
+    #myList {
+      margin: 16px 0px;
+      padding: 0px 0px 0px 40px;
+    }
+
+    .caret {
+      cursor: pointer;
+      -webkit-user-select: none; /* Safari 3.1+ */
+      -moz-user-select: none; /* Firefox 2+ */
+      -ms-user-select: none; /* IE 10+ */
+      user-select: none;
+    }
+
+    .caret::before {
+      content: "\25B6"; /* \25B6 right-pointing triangle symbol */
+      color: black;
+      display: inline-block;
+      margin-right: 6px;
+    }
+
+    .caret-down::before {
+      -ms-transform: rotate(90deg); /* IE 9 */
+      -webkit-transform: rotate(90deg); /* Safari */
+      transform: rotate(90deg);  
+    }
+
+    .nested {
+      display: none;
+    }
+
+    .active {
+      display: block;
+    }
+</style>
+</head>
+<body>
+
+<h2>JavaScript Tree View Proposal</h2>
+<p>
+    A tree view represents a hierarchical view of information, where each item can
+    have a number of subitems. Click on the arrow(s) to open or close the tree branches.
+</p>
+<p>
+    The Tree View will use a WebAPI to read a database. and build nested lists of 
+    the JSON. One requirement will be LEFT JOINs in the query since some nodes on the tree
+    may not have children (e.g. water and coffee). 
+</p>
+<pre><code>
+    /* sample query */
+    select 
+	b.beverage,
+        bt.beverageType,
+        bi.ingredient
+    from beverage as b
+    left join beverageType as bt on bt.beverageFK = b.beveragePK
+    left join beverageIngredient bi on bi.beverageTypeFK = bt.beverageTypePK     
+</pre></code>
+<pre><code>
+    /* sample JSON */
+    [
+        {"beverage":"water" , "beverageType":null,    "ingredient":null},
+        {"beverage":"coffee", "beverageType":null,    "ingredient":null},
+        {"beverage":"tea",    "beverageType":"black", "ingredient":null},
+        {"beverage":"tea",    "beverageType":"white", "ingredient":null},
+        {"beverage":"tea",    "beverageType":"green", "ingredient":"sencha"},
+        {"beverage":"tea",    "beverageType":"green", "ingredient":"gyokuro"},
+        {"beverage":"tea",    "beverageType":"green", "ingredient":"matcha"},
+        {"beverage":"tea",    "beverageType":"green", "ingredient":"pi lo chun"},
+    ]
+</pre></code>
+<p>
+    The HTML coder will add an HTML UL element on the web page where the Tree View element will be 
+    inserted. Also a couple lines of &lt;script&gt; will supply the input JSON, and 
+    execute the MakeTreeView function to insert the element. 
+</p>
+<p>
+    Sample webpage HTML.
+</p>
+<pre><code>
+    &lt;ul id="myUL"&gt;&lt;/ul&gt;
+</code></pre>
+<p>
+    Sample &lt;script&gt; to create input tree and execute the MarkTreeView function.
+</p>
+<pre><code>
+    &lt;script&gt;
+        var treeOfBeverages = MakeTreeOfBeverages();
+        treeOfBeverages.makeTreeView("myUL"); 
+    &lt;/script&gt;
+</code></pre>
+<p>
+    Here are the reference links:<br><br>
+    <ul style="list-style-type:disc;">
+        <li>
+            Original How To on W3Schools: 
+            <a href='https://www.w3schools.com/howto/howto_js_treeview.asp'>
+               https://www.w3schools.com/howto/howto_js_treeview.asp</a><br>
+        </li>
+        <li>
+            Good (very complex) resource for JavaScript Data Structures: 
+            <a href='https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393'>
+            https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393</a><br>            
+        </li>
+        <li>
+            Another resource for JavaScript Data Structures: 
+            <a href='https://medium.com/@_jmoller/javascript-data-structures-trees-c961297e6482'>
+            https://medium.com/@_jmoller/javascript-data-structures-trees-c961297e6482</a><br>
+        </li>
+        <li>
+            A good explanation of JavaScript "classes" and the prototype: 
+            <a href='https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work'>
+            https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work</a><br>        
+        </li>
+    </ul>
+</p>
+<p>
+    Below are sample web widgets.
+</p>
+<div>
+    <p>This hard-coded list is verbatim from How To Create a Tree View - W3Schools</p>
+    <pre>
+    &lt;ul id="myUL"&gt;
+      &lt;li&gt;&lt;span class="caret"&gt;Beverages&lt;/span&gt;
+        &lt;ul class="nested"&gt;
+          &lt;li&gt;Water&lt;/li&gt;
+          &lt;li&gt;Coffee&lt;/li&gt;
+          &lt;li&gt;&lt;span class="caret"&gt;Tea&lt;/span&gt;
+            &lt;ul class="nested"&gt;
+              &lt;li&gt;Black Tea&lt;/li&gt;
+              &lt;li&gt;White Tea&lt;/li&gt;
+              &lt;li&gt;&lt;span class="caret"&gt;Green Tea&lt;/span&gt;
+                &lt;ul class="nested"&gt;
+                  &lt;li&gt;Sencha&lt;/li&gt;
+                  &lt;li&gt;Gyokuro&lt;/li&gt;
+                  &lt;li&gt;Matcha&lt;/li&gt;
+                  &lt;li&gt;Pi Lo Chun&lt;/li&gt;
+                &lt;/ul&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+    </pre>
+    <hr>
+    <ul id="myUL"></ul>
+</div>
+<div>
+    <p>
+        This is generated from an initial version of the MakeTreeView function. Given this input tree 
+        based on the W3 How To example, MakeTreeView will create the following 
+        TreeView. Notice all children are inserted under the last sibling per the W3Schools 
+        example. 
+    </p>
+    <pre>
+    beverages
+      |--- water
+      |--- coffee
+      |--- tea
+           |--- black
+           |--- white
+           |--- green
+                |--- sencha
+                |--- gyokuro
+                |--- matcha
+                |--- pi lo chun
+    </pre>
+    <hr>
+    <ul id="myList"></ul>
+</div>
+<div>
+    <p>
+        This is generated from an initial version of the MakeTreeView function. 
+        The list of numbers example shows the lack of function to end a list, 
+        and it parses the tree incorrectly. In the initial attempt each element with 
+        children is incorrectly placed at successive depths of the tree. 
+    </p>
+    <pre>
+    one
+    |--- two
+    |    |--- five
+    |    |--- six
+    |--- three
+    |--- four
+         |--- seven
+    </pre>
+    <hr>
+    <ul id="myOtherList"></ul>
+</div>
+<script>
+    
+    "use strict";
+
+    function MakeTreeW3Example (id) {
+        var example = `
+          <li><span class="caret">Beverages</span>
+            <ul class="nested">
+              <li>Water</li>
+              <li>Coffee</li>
+              <li><span class="caret">Tea</span>
+                <ul class="nested">
+                  <li>Black Tea</li>
+                  <li>White Tea</li>
+                  <li><span class="caret">Green Tea</span>
+                    <ul class="nested">
+                      <li>Sencha</li>
+                      <li>Gyokuro</li>
+                      <li>Matcha</li>
+                      <li>Pi Lo Chun</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>  
+            </ul>
+          </li>
+        </ul>`;
+        document.getElementById(id).innerHTML = example;
+        var toggler = document.getElementById(id).getElementsByClassName("caret");
+        for (var i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function() {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+            });
+        }
+    }
+    function MyLastChild (params) {
+        var list = params["list"];
+        var ele = params["ele"];
+        if (list.getElementsByTagName(ele).length) {
+            return list.getElementsByTagName(ele)[list.getElementsByTagName(ele).length - 1];
+        } else {
+            return list.lastChild;
+        }
+    };
+    function Node(data) {
+        this.data = data;
+        this.parent = null;
+        this.children = [];
+    }
+    function Tree(data) {
+        var node = new Node(data);
+        this._root = node;
+    }
+    function Stack() {
+        this._size = 0;
+        this._storage = {};
+    }
+    Stack.prototype.push = function(data) {
+        // increases the size of our storage
+        var size = this._size++;
+        // assigns size as a key of storage
+        // assigns data as the value of this key
+        this._storage[size] = data;
+    };  
+    Tree.prototype.search = function(theNode) {
+        // this is a recursive and immediately-invoking function starting at the root of the tree 
+        (function recurse(currentNode) {
+            // step 2
+            for (var i = 0, length = currentNode.children.length; i < length; i++) {
+                // step 3
+                if (currentNode.data === theNode.data) {
+                    return currentNode.data;
+                }// else {
+                //    recurse(currentNode.children[i]);
+                //}
+            }
+            // step 4
+            //callback(currentNode);
+            // step 1
+        })(this._root);
+
+    };
+    function addList () {
+        var list = document.createElement("ul");
+        list.setAttribute("class","nested");
+        return list;
+    };
+    function addItem (innerHTML) {
+        var li = document.createElement("li");
+        li.innerHTML = innerHTML;
+        return li;
+    };
+    /*
+     * "Constructor function" named Stack. 
+     * Each instance of Stack will have two properties: size and storage.
+     */
+    function MakeTreeOfBeverages () {
+        /*
+          create this tree
+         
+        beverages
+        ├── water
+        ├── coffee
+        └── tea
+             ├── black
+             ├── white
+             └── green
+                  ├── sencha
+                  ├── gyokuro
+                  ├── matcha
+                  └── pi lo chun
+                  
+        query results
+        beverage  beverageType  ingredient
+        -------   ------------  ----------
+        water       null          null
+        coffee      null          null
+        tea         black         null
+        tea         white         null
+        tea         green         sencha
+        tea         green         gyokuro
+        tea         green         matcha
+        tea         green         pi lo chun
+
+        json
+        [
+            {"beverage":"water" , "beverageType":"null",  "ingredient":"null"},
+            {"beverage":"coffee", "beverageType":"null",  "ingredient":"null"},
+            {"beverage":"tea",    "beverageType":"black", "ingredient":"null"},
+            {"beverage":"tea",    "beverageType":"white", "ingredient":"null"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"sencha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"gyokuro"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"matcha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"pi lo chun"},
+        ]
+         */
+        var tree = new Tree('beverages');
+
+        tree._root.children.push(new Node('water'));
+        tree._root.children[0].parent = tree;
+
+        tree._root.children.push(new Node('coffee'));
+        tree._root.children[1].parent = tree;
+
+        tree._root.children.push(new Node('tea'));
+        tree._root.children[2].parent = tree;
+
+        tree._root.children[2].children.push(new Node('black'));
+        tree._root.children[2].children[0].parent = tree._root.children[2];
+
+        tree._root.children[2].children.push(new Node('white'));
+        tree._root.children[2].children[1].parent = tree._root.children[2];
+
+        tree._root.children[2].children.push(new Node('green'));
+        tree._root.children[2].children[2].parent = tree._root.children[2];
+
+        tree._root.children[2].children[2].children.push(new Node('sencha'));
+        tree._root.children[2].children[2].children[0].parent = tree._root.children[2].children[2];
+
+        tree._root.children[2].children[2].children.push(new Node('gyokuro'));
+        tree._root.children[2].children[2].children[1].parent = tree._root.children[2].children[2];
+
+        tree._root.children[2].children[2].children.push(new Node('matcha'));
+        tree._root.children[2].children[2].children[2].parent = tree._root.children[2].children[2];
+
+        tree._root.children[2].children[2].children.push(new Node('pi lo chun'));
+        tree._root.children[2].children[2].children[3].parent = tree._root.children[2].children[2]; 
+
+        return tree;
+    }
+    
+    function MakeTreeOfNumbers () {
+        
+        /*
+
+        create this tree
+
+        one
+        ├── two
+        │   ├── five
+        │   └── six
+        ├── three
+        └── four
+            └── seven
+
+        */
+        var tree = new Tree('one');
+
+        tree._root.children.push(new Node('two'));
+        tree._root.children[0].parent = tree;
+
+        tree._root.children.push(new Node('three?'));
+        tree._root.children[1].parent = tree;
+
+        tree._root.children.push(new Node('four?'));
+        tree._root.children[2].parent = tree;
+
+        tree._root.children[0].children.push(new Node('five'));
+        tree._root.children[0].children[0].parent = tree._root.children[0];
+
+        tree._root.children[0].children.push(new Node('six'));
+        tree._root.children[0].children[1].parent = tree._root.children[0];
+
+        tree._root.children[2].children.push(new Node('seven'));
+        tree._root.children[2].children[0].parent = tree._root.children[2];
+        
+        return tree;
+        
+    }
+    /*
+     * This has a bug where each nested list is inserted at successive depths in the tree view.
+     * It only works per the W3 example where only the last child contains a subtree.
+     * See the example widget for tree of numbers. 
+     */
+    Tree.prototype.makeTreeView = function(id) {
+        var list = document.getElementById(id);
+        // this fn. inside the parens "()" is named recurse and the fn is immediately invoked
+        // it starts at the root of the tree
+        (function recurse(currentNode) {
+            // this node has children. add the list and start a new list for following children
+            if (currentNode.children.length) {
+                if (list.lastChild) {
+                    MyLastChild({"list":list, "ele":"ul"}).appendChild(addItem("<span class='caret'>" + currentNode.data + "</span>"));    
+                    MyLastChild({"list":list, "ele":"li"}).appendChild(addList(currentNode.data));    
+                } else {
+                    list.appendChild(addItem("<span class='caret'>" + currentNode.data + "</span>"));
+                    MyLastChild({"list":list, "ele":"li"}).appendChild(addList(currentNode.data));    
+                }
+            // this node has no children. just add the list item
+            } else {
+                if (list.lastChild) {
+                    MyLastChild({"list":list, "ele":"ul"}).appendChild(addItem(currentNode.data));    
+                } else {
+                    MyLastChild({"list":list, "ele":"ul"}).appendChild(addItem(currentNode.data));    
+                }
+            }
+            // step 2 Enter a for loop and iterate once for each child of currentNode, beginning with the first child. 
+            for (var i = 0, length = currentNode.children.length; i < length; i++) {
+                // step 3 Inside the body of the for loop, invoke recurse with a children of currentNode.
+                recurse(currentNode.children[i]);
+            }
+            // step 4 When currentNode no longer has children, we exit the for loop 
+            // and invoke the callback we passed during the invocation of traverseDF(callback). 
+            //callback(currentNode);
+
+            // step 1 Immediately invoke recurse with the root node of a tree as its argumen
+        })(this._root);
+        debugger;
+        var toggler = document.getElementById(id).getElementsByClassName("caret");
+        for (var i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function() {
+            this.parentElement.querySelector(".nested").classList.toggle("active");
+            this.classList.toggle("caret-down");
+            });
+        }
+    };    
+    /* MakeTreeView main program */
+
+    MakeTreeW3Example("myUL");
+
+    var treeOfBeverages = MakeTreeOfBeverages();
+    treeOfBeverages.makeTreeView("myList"); 
+
+    var treeOfNumbers = MakeTreeOfNumbers();
+    treeOfNumbers.makeTreeView("myOtherList"); 
+   
+    var json = 
+        [
+            {"beverage":"water" , "beverageType":null,  "ingredient":null},
+            {"beverage":"coffee", "beverageType":null,  "ingredient":null},
+            {"beverage":"tea",    "beverageType":"black", "ingredient":null},
+            {"beverage":"tea",    "beverageType":"white", "ingredient":null},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"sencha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"gyokuro"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"matcha"},
+            {"beverage":"tea",    "beverageType":"green", "ingredient":"pi lo chun"}
+        ];
+        
+    console.log(json);
+    
+//    var tree = new Tree('beverages');
+//    // tree is an example of a root node
+//    for (var i = 0; i < json.length; i++) {
+//        for (var prop in json[i]) {
+//            debugger;
+//            var search = tree.search();
+//            if (!tree.search()) {
+//                tree.push(new Node(json[i][prop]));
+//                tree._root.children[0].parent = tree;
+//            };
+//        }
+//    }
+
+</script>
+
+</body>
+</html>

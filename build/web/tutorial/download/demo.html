@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Tree View</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            ul, .treeview, .treeview ul {
+              list-style-type: none;
+            }
+
+            .treeview li {
+              margin: 0vw;
+              padding: 0vw;
+            }
+
+            .caret {
+              cursor: pointer;
+              -webkit-user-select: none; /* Safari 3.1+ */
+              -moz-user-select: none; /* Firefox 2+ */
+              -ms-user-select: none; /* IE 10+ */
+              user-select: none;
+            }
+
+            .caret::before {
+              content: "\25B6";
+              color: black;
+              display: inline-block;
+              margin-right: 6px;
+            }
+
+            .caret-down::before {
+              -ms-transform: rotate(90deg); /* IE 9 */
+              -webkit-transform: rotate(90deg); /* Safari */
+              transform: rotate(90deg);  
+            }
+
+            .nested {
+              display: none;
+            }
+
+            .active {
+              display: block;
+            }
+              
+            .stop {
+                  clear:both;
+            }
+        </style>
+        <style>
+            div {
+                float:left;
+                margin:1vw; 
+                padding:1vw; 
+                border: solid 1px #CCCCCC; 
+                min-width:25vw;
+                max-width:25vw;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Tree View Webpage Widget</h1>
+    <h2>
+        Here are some sample Tree View widgets.
+    </h2>
+    <div>
+        <p>
+            This example is a hard-coded list verbatim from W3Schools.com How To Create a Tree View.
+        </p>
+        <hr>
+        <p id="W3Example"></p>
+    </div>
+    <div id="contentAPI" style="border:1px solid lightgrey;float:left;">
+        <p>
+            This is a TreeView DOM element created using "Option 1: WebAPI Tree View"
+            where the server builds the JSON Object with an API.  
+        </p>
+        <hr>
+    </div>
+    <div id="TreeViewContainer" style="border:1px solid lightgrey;float:left;">
+        <p>
+            This is "Option 2: Client-side Tree View" where the Tree View is 
+            created using client-side code to build JSON Object.
+        </p>
+        <hr> 
+    </div>
+    <h2 class="stop">
+
+    <script src="js/ajax2.js"></script>
+    <script src="js/components/Node.js"></script>
+    <script src="js/components/Queue.js"></script>
+    <script src="js/components/Stack.js"></script>
+    <script src="js/components/Tree.js"></script>
+    <script src="js/MakeTreeViewW3Example.js"></script>
+    <script src="js/MakeTreeViewAPI.js"></script>
+    <script src="js/MakeTreeView.js"></script>
+    <script>
+        
+        "use strict";
+
+        // This is the original example from W3Schools How To
+        MakeTreeW3Example("W3Example");
+        
+        debugger;
+        
+        // Option 1: server side TreeView build using API to build json obj 
+        MakeTreeViewAPI ({
+           "url" : "json/VisitsByDate.json",
+           "container" : "contentAPI"
+        });        
+        
+        // Option 2: client-side TreeView build using JavaScript code to build json obj 
+        const numObj =
+                [
+                    {"a":"one", "b":"two" ,  "c":"five"},
+                    {"a":"one", "b":"two" ,  "c":"five", "d":"eight"},
+                    {"a":"one", "b":"two" ,  "c":"six"},
+                    {"a":"one", "b":"three"},
+                    {"a":"one", "b":"four",  "c":"seven"}
+                ];
+        MakeTreeView({
+            "json" : numObj,
+            "container" : "TreeViewContainer"
+        });
+        
+    </script>
+    </body>
+</html>

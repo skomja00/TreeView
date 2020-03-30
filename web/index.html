@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Tree View</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            ul, .treeview, .treeview ul {
+              list-style-type: none;
+            }
+
+            .treeview li {
+              margin: 0vw;
+              padding: 0vw;
+            }
+
+            .caret {
+              cursor: pointer;
+              -webkit-user-select: none; /* Safari 3.1+ */
+              -moz-user-select: none; /* Firefox 2+ */
+              -ms-user-select: none; /* IE 10+ */
+              user-select: none;
+            }
+
+            .caret::before {
+              content: "\25B6";
+              color: black;
+              display: inline-block;
+              margin-right: 6px;
+            }
+
+            .caret-down::before {
+              -ms-transform: rotate(90deg); /* IE 9 */
+              -webkit-transform: rotate(90deg); /* Safari */
+              transform: rotate(90deg);  
+            }
+
+            .nested {
+              display: none;
+            }
+
+            .active {
+              display: block;
+            }
+              
+            .stop {
+                  clear:both;
+            }
+        </style>
+        <style>
+            div {
+                float:left;
+                margin:1vw; 
+                padding:1vw; 
+                border: solid 1px #CCCCCC; 
+                min-width:25vw;
+                max-width:25vw;
+            }
+        </style>
+    </head>
+    <body>
+    <h1>Tree View Webpage Widget</h1>
+    <p>
+        A tree view represents a hierarchical view of information where each item 
+        can have a number of sub-items. Click on the arrow(s) to open or close 
+        the tree branches.
+    </p>
+    <p>
+        You can create a Tree View using either of two options. One option will 
+        use a WebAPI to read a database. The other option is to build a Tree View 
+        using client-side code. The resulting JSON Object from both options is used
+        to build the Tree View of nested HTML lists.
+    <p>
+        For both options the HTML coder needs to do two things. One, add an element on the web page 
+        where the Tree View will be inserted. And two include a couple lines of 
+        &lt;script&gt; to create the Tree View content. The &lt;script&gt;
+        is a bit different depending on what option you choose to implement the 
+        Tree View. More detail is provided below under each option. Providing options gives
+        greater flexibility for the user to create content. 
+    </p>
+    <ol>
+        <li>
+            <p>
+                Add a target element to the web page to insert the Tree View. 
+                Sample HTML might look like this.        
+            </p>
+            <pre><code>
+                &lt;div id='TreeViewContainer'&gt;&lt;/div&gt;
+            </code></pre>
+        </li>
+        <li>
+            <p>
+                Run the Tree View function. Sample &lt;script&gt; can be found in the following options.
+            </p>
+        </li>
+    </ol>
+    <h2>Option 1: WebAPI Tree View</h2>
+    <p>
+        For the WebAPI, the requirements for the database query are as follows. View
+        sample database scripts by clicking <a target="_blank" href="mysql-dbase-build.sql">here</a>. 
+        The WebAPI can be run by clicking <a target="_blank" href="webAPIs/listAPI.jsp">here</a>.
+    </p>
+    <ol>
+        <li>
+            Use LEFT OUTER JOINs in the query. It is valid for the WebAPI to return null
+            columns. A null indicates nothing further on the branch, and marks the end of a list (i.e. 
+            &lt;/ul&gt;) in the TreeView. An 
+            item will not open or close when it does not contain a nested list (e.g. water).
+            Columns names/aliases are needed by the View. A generic
+            listAPI is available to build a Tree View with whatever appears in columns with the aliases
+            'a' through 'd'. Otherwise they become JSON properties, but Tree View 
+            does nothing with them specifically. 
+        </li>
+        <li>
+            Give the TreeView a name (i.e. root node) by typing a hard-code value 
+            in the 1st column of the query (e.g. 'beverages'). 
+        </li>
+    </ol>
+    <pre><code>
+        /* sample query */
+        select 
+            'beverages' as a, 
+            bev.bev_id as b,
+            bevType.bevType_id as c,
+            bevIngredient.ingredient as d
+        from bev
+        left outer join bevType on bevType.bev_id = bev.bev_id
+        left outer join bevIngredient on bevIngredient.bevType_id = bevType.bevType_id
+        order by 1,2,3,4;  
+    </code></pre>
+    <pre><code>
+        /* sample JSON Object returned from the WebAPI */
+        {   "dbError": "",
+            "json": [
+            {"a":"beverages", "b":"water",  "c":"",            "d":""},
+            {"a":"beverages", "b":"coffee", "c":"server-side", "d":""},
+            {"a":"beverages", "b":"tea",    "c":"black",       "d":""},
+            {"a":"beverages", "b":"tea",    "c":"white",       "d":""},
+            {"a":"beverages", "b":"tea",    "c":"green",       "d":"sencha"},
+            {"a":"beverages", "b":"tea",    "c":"green",       "d":"gyokuro"},
+            {"a":"beverages", "b":"tea",    "c":"green",       "d":"matcha"},
+            {"a":"beverages", "b":"tea",    "c":"green",       "d":"pi lo chun"}
+	]}
+    </code></pre>
+    <p>
+        Sample &lt;script&gt; to call the MakeTreeAPI accepts a parameter object 
+        with two properties. The "url" property will 
+        be the name of the API, and the "container" property will provide the id
+        of a web page element to insert the widget.
+    </p>
+    <pre><code>
+    &lt;script&gt;
+        MakeTreeAPI ({
+           "url" : "webAPIs/listBeveragesAPI.jsp",
+           "container" : "contentAPI"
+        });        
+    &lt;/script&gt;
+    </code></pre>
+
+        
+    <h2>Option 2: Client-side Tree View</h2>
+    <p>
+        The client-side option allows the user to create content with JavaScript.
+        In this example a simple hard-coded JSON is used. The &lt;script&gt; to 
+        create a tree view element might look like this.
+    </p>
+    <pre><code>
+    /* sample Tree View scripts */
+    const numObj =
+            [
+                {"a":"one", "b":"two" ,  "c":"five"},
+                {"a":"one", "b":"two" ,  "c":"five", "d":"eight"},
+                {"a":"one", "b":"two" ,  "c":"six"},
+                {"a":"one", "b":"three"},
+                {"a":"one", "b":"four",  "c":"seven"}
+            ];
+    MakeTreeView({
+        "json" : numObj,
+        "container" : "TreeViewContainer"
+    });  
+    </code></pre>
+
+    <h2>
+        Here are some sample Tree View widgets.
+    </h2>
+    <div>
+        <p>
+            This example is a hard-coded list verbatim from W3Schools.com How To Create a Tree View.
+        </p>
+        <hr>
+        <p>
+            This is the HTML.
+        </p>
+        <pre>
+        &lt;ul id="myUL"&gt;
+          &lt;li&gt;&lt;span class="caret"&gt;Beverages&lt;/span&gt;
+            &lt;ul class="nested"&gt;
+              &lt;li&gt;Water&lt;/li&gt;
+              &lt;li&gt;Coffee&lt;/li&gt;
+              &lt;li&gt;&lt;span class="caret"&gt;Tea&lt;/span&gt;
+                &lt;ul class="nested"&gt;
+                  &lt;li&gt;Black Tea&lt;/li&gt;
+                  &lt;li&gt;White Tea&lt;/li&gt;
+                  &lt;li&gt;&lt;span class="caret"&gt;Green Tea&lt;/span&gt;
+                    &lt;ul class="nested"&gt;
+                      &lt;li&gt;Sencha&lt;/li&gt;
+                      &lt;li&gt;Gyokuro&lt;/li&gt;
+                      &lt;li&gt;Matcha&lt;/li&gt;
+                      &lt;li&gt;Pi Lo Chun&lt;/li&gt;
+                    &lt;/ul&gt;
+                  &lt;/li&gt;
+                &lt;/ul&gt;
+              &lt;/li&gt;
+            &lt;/ul&gt;
+          &lt;/li&gt;
+        &lt;/ul&gt;
+        </pre>
+        <p>
+            The resulting TreeView widget looks like this.
+        </p>
+        <p id="W3Example"></p>
+    </div>
+    <div id="contentAPI" style="border:1px solid lightgrey;float:left;">
+        <p>
+            This is a TreeView DOM element created using "Option 1" where the server
+            side is used to build the JSON Object with an API.  
+        </p>
+        <hr>
+        <p>
+            This tree data structure for this sample is as follows.
+        </p>
+        <pre>
+        beverages
+        |
+        |--- coffee
+        |    |
+        |    |--- server-side coffee
+        |
+        |--- tea
+        |    |
+        |    |--- black
+        |    |
+        |    |--- green
+        |    |    |
+        |    |    |--- sencha
+        |    |    |--- gyokuro
+        |    |    |--- matcha
+        |    |    |--- pi lo chun
+        |    |
+        |    |--- white
+        |
+        |--- water
+        </pre>
+        <p>
+            The resulting TreeView widget looks like this.
+        </p>
+    </div>
+           
+    <div id="TreeViewContainer" style="border:1px solid lightgrey;float:left;">
+        <p>
+            This is "Option 2" where the TreeView is created using client-side code 
+            to build JSON Object.
+        </p>
+        <hr> 
+    </div>
+    <h2 class="stop">
+        Reference links
+    </h2>
+    <ul style="list-style-type:disc;">
+        <li>
+            Original Tree View How To on W3Schools: 
+            <a href='https://www.w3schools.com/howto/howto_js_treeview.asp'>
+               https://www.w3schools.com/howto/howto_js_treeview.asp</a><br>
+        </li>
+        <li>
+            Primary resource for JavaScript Data Structures: 
+            <a href='https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393'>
+            https://code.tutsplus.com/articles/data-structures-with-javascript-tree--cms-23393</a><br>            
+        </li>
+        <li>
+            Another good explanation for JavaScript Data Structures: 
+            <a href='https://medium.com/@_jmoller/javascript-data-structures-trees-c961297e6482'>
+            https://medium.com/@_jmoller/javascript-data-structures-trees-c961297e6482</a><br>
+        </li>
+        <li>
+            A good explanation of JavaScript "classes", inheritance, and the prototype: 
+            <a href='https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work'>
+            https://stackoverflow.com/questions/572897/how-does-javascript-prototype-work</a><br>        
+        </li>
+    </ul>
+    <script src="js/ajax2.js"></script>
+    <script src="js/components/beverages.js"></script>
+    <script src="js/components/Node.js"></script>
+    <script src="js/components/Queue.js"></script>
+    <script src="js/components/Stack.js"></script>
+    <script src="js/components/Tree.js"></script>
+    <script src="js/MakeTreeViewW3Example.js"></script>
+    <script src="js/MakeTreeViewAPI.js"></script>
+    <script src="js/MakeTreeView.js"></script>
+    <script>
+        
+        "use strict";
+
+        /* main program */
+        
+        // This is the original example from W3Schools How To
+        MakeTreeW3Example("W3Example");
+        
+        // Option 1: server side TreeView build using API to build json obj 
+        MakeTreeViewAPI ({
+           "url" : "webAPIs/listAPI.jsp",
+           "container" : "contentAPI"
+        });        
+        
+        // Option 2: client-side TreeView build using JavaScript code to build json obj 
+        const numObj =
+                [
+                    {"a":"one", "b":"two" ,  "c":"five"},
+                    {"a":"one", "b":"two" ,  "c":"five", "d":"eight"},
+                    {"a":"one", "b":"two" ,  "c":"six"},
+                    {"a":"one", "b":"three"},
+                    {"a":"one", "b":"four",  "c":"seven"}
+                ];
+        MakeTreeView({
+            "json" : numObj,
+            "container" : "TreeViewContainer"
+        });
+        
+    </script>
+    </body>
+</html>
