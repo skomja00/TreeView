@@ -9,59 +9,8 @@ and open the template in the editor.
         <title>Tree View</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            ul, .treeview, .treeview ul {
-              list-style-type: none;
-            }
-
-            .treeview li {
-              margin: 0vw;
-              padding: 0vw;
-            }
-
-            .caret {
-              cursor: pointer;
-              -webkit-user-select: none; /* Safari 3.1+ */
-              -moz-user-select: none; /* Firefox 2+ */
-              -ms-user-select: none; /* IE 10+ */
-              user-select: none;
-            }
-
-            .caret::before {
-              content: "\25B6";
-              color: black;
-              display: inline-block;
-              margin-right: 6px;
-            }
-
-            .caret-down::before {
-              -ms-transform: rotate(90deg); /* IE 9 */
-              -webkit-transform: rotate(90deg); /* Safari */
-              transform: rotate(90deg);  
-            }
-
-            .nested {
-              display: none;
-            }
-
-            .active {
-              display: block;
-            }
-              
-            .stop {
-                  clear:both;
-            }
-        </style>
-        <style>
-            div {
-                float:left;
-                margin:1vw; 
-                padding:1vw; 
-                border: solid 1px #CCCCCC; 
-                min-width:25vw;
-                max-width:25vw;
-            }
-        </style>
+        <link href="style/treeView.css" rel="stylesheet" type="text/css" />  
+        <link href="style/styles.css" rel="stylesheet" type="text/css" />  
     </head>
     <body>
     <h1>Tree View Webpage Widget</h1>
@@ -231,34 +180,6 @@ and open the template in the editor.
             side is used to build the JSON Object with an API.  
         </p>
         <hr>
-        <p>
-            This tree data structure for this sample is as follows.
-        </p>
-        <pre>
-        beverages
-        |
-        |--- coffee
-        |    |
-        |    |--- server-side coffee
-        |
-        |--- tea
-        |    |
-        |    |--- black
-        |    |
-        |    |--- green
-        |    |    |
-        |    |    |--- sencha
-        |    |    |--- gyokuro
-        |    |    |--- matcha
-        |    |    |--- pi lo chun
-        |    |
-        |    |--- white
-        |
-        |--- water
-        </pre>
-        <p>
-            The resulting TreeView widget looks like this.
-        </p>
     </div>
            
     <div id="TreeViewContainer" style="border:1px solid lightgrey;float:left;">

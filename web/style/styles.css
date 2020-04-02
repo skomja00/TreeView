@@ -1,0 +1,11 @@
+.stop {
+      clear:both;
+}
+div {
+    float:left;
+    margin:1vw; 
+    padding:1vw; 
+    border: solid 1px #CCCCCC; 
+    min-width:25vw;
+    max-width:25vw;
+}

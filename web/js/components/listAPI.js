@@ -4,12 +4,12 @@ beverages.list = function () {
 
     // Remember: getting a DB error does NOT mean ajax call unsuccessful. That is a secondary error after ajax call OK.
     ajax2({
-        url: "webAPIs/listBeveragesAPI.jsp",
-        successFn: listBeveragesAPISuccess,
+        url: "webAPIs/listAPI.jsp",
+        successFn: listAPISuccess,
         errorId: "content"
     });
 
-    function listBeveragesAPISuccess(obj) {
+    function listAPISuccess(obj) {
         
         // var obj = JSON.parse(hreq.responseText); // this already done by function ajax2...
         if (!obj) {
